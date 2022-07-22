@@ -1,0 +1,34 @@
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.modal {
+  max-width: 400px;
+  position: relative;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.modal button {
+  background: none;
+  position: absolute;
+  top: 0px;
+  left: 91%;
+  border: none;
+  height: 2rem;
+  width: 2rem;
+}
+
+.modal h4 {
+  color: #444;
+  font-weight: bold;
+}

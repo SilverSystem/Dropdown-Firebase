@@ -1,22 +1,30 @@
 import s from './App.module.css';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { collection, query, getDocs } from 'firebase/firestore';
-import { store } from './firebase';
-import { mockup } from './mockup';
+import {
+  collection,
+  query,
+  getDocs,
+  limit,
+  startAfter,
+} from 'firebase/firestore';
+import { db } from './firebase';
 import attributes from './helpers/attributes';
+import Details from './components/Details/Details';
+import Create from './components/Create/Create';
 
 function App() {
   const [users, setUsers] = useState([]);
   const [showUsers, setShowUsers] = useState(false);
   const [searchedUser, setSearchedUser] = useState('');
+  const [lastVisible, setLastVisible] = useState({});
   const [attributeIndex, setAttributeIndex] = useState(0);
   const [selectedId, setSelectedId] = useState(null);
 
-  const search = e => {
+  const search = async e => {
     e.preventDefault();
-    if (!searchedUser) {
-      setUsers(mockup);
+    if (!searchedUser || users.length === 0) {
+      await fillInitialData();
       return setShowUsers(true);
     }
     const filteredUsers = attributes[attributeIndex].filterSearch(
@@ -27,9 +35,9 @@ function App() {
     setShowUsers(true);
   };
 
-  const handleSearch = e => {
-    if (!e.target.value) {
-      setUsers(mockup);
+  const handleSearch = async e => {
+    if (!e.target.value || users.length === 0) {
+      await fillInitialData();
     } else {
       const filteredUsers = attributes[attributeIndex].filterSearch(
         users,
@@ -44,24 +52,36 @@ function App() {
     setAttributeIndex(e.target.selectedIndex);
   };
 
-  // useEffect(() => {
-  //   console.log('Me ejecuto');
-  //   const items = async () => {
-  //     const connect = query(collection(store, 'Users'));
-  //     const data = await getDocs(connect);
-  //     const inv = [];
-  //     data.forEach(el => {
-  //       inv.push({ ...el.data() });
-  //     });
-  //     setUsers(inv);
-  //   };
-  //   items();
-  // }, []);
+  const paginate = async () => {
+    const connect = query(
+      collection(db, 'Users'),
+      startAfter(lastVisible),
+      limit(20)
+    );
+    const dataSnapshot = await getDocs(connect);
+    const inv = dataSnapshot.docs.map(el => el.data());
+    setUsers([...users, ...inv]);
+    setLastVisible(dataSnapshot[dataSnapshot.docs.length - 1]);
+  };
 
-  // useEffect(() => {
-  //   setUsers(mockup);
-  // }, []);
-  //console.log(users);
+  const fillInitialData = async () => {
+    const connect = query(collection(db, 'Users'), limit(20));
+    const dataSnapshot = await getDocs(connect);
+    const lastVisible = dataSnapshot[dataSnapshot.docs.length - 1];
+    const inv = dataSnapshot.docs.map(el => el.data());
+    console.log(inv);
+    setUsers(inv);
+    setLastVisible(lastVisible);
+  };
+
+  window.onscroll = function () {
+    if (
+      window.innerHeight + document.documentElement.scrollTop ===
+      document.documentElement.offsetHeight
+    ) {
+      paginate();
+    }
+  };
 
   return (
     <motion.div
@@ -108,47 +128,35 @@ function App() {
       </form>
       {showUsers && (
         <div className={s.list}>
+          <motion.h3 layoutId={-1} onClick={() => setSelectedId(-1)}>
+            Agregar nuevo usuario
+          </motion.h3>
           {users.map(u => (
             <motion.h3
-              layoutId={u.id}
-              key={u.id}
-              onClick={() => setSelectedId(u.id)}
+              layoutId={u.nit}
+              key={u.nit}
+              onClick={() => setSelectedId(u.nit)}
             >
               {u.nombre}
             </motion.h3>
           ))}
         </div>
       )}
-      {/* <AnimatePresence>
-          {selectedId && (
-            <motion.div layoutId={selectedId}>
-              <motion.h5>{item.subtitle}</motion.h5>
-              <motion.h2>{item.title}</motion.h2>
-              <motion.button onClick={() => setSelectedId(null)} />
-            </motion.div>
-          )}
-        </AnimatePresence> */}
+      <AnimatePresence>
+        {selectedId ? (
+          selectedId === -1 ? (
+            <Create id={-1} close={() => setSelectedId(null)} users={users} />
+          ) : (
+            <Details
+              users={users}
+              id={selectedId}
+              close={() => setSelectedId(null)}
+            />
+          )
+        ) : null}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
 export default App;
-
-// const [selectedId, setSelectedId] = useState(null)
-
-// {items.map(item => (
-//   <motion.div layoutId={item.id} onClick={() => setSelectedId(item.id)}>
-//     <motion.h5>{item.subtitle}</motion.h5>
-//     <motion.h2>{item.title}</motion.h2>
-//   </motion.div>
-// ))}
-
-// <AnimatePresence>
-//   {selectedId && (
-//     <motion.div layoutId={selectedId}>
-//       <motion.h5>{item.subtitle}</motion.h5>
-//       <motion.h2>{item.title}</motion.h2>
-//       <motion.button onClick={() => setSelectedId(null)} />
-//     </motion.div>
-//   )}
-// </AnimatePresence>
