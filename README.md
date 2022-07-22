@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# DropDown & Firebase Challenge
 
 Este proyecto fue creado con el fin de completar una prueba tecnica, no se utilizaron variables de entorno para poder facilitar la interaccion.
 
