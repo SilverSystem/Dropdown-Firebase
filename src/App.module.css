@@ -1,0 +1,49 @@
+.App {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: baseline;
+}
+
+form {
+  display: flex;
+  border-bottom: 2px solid black;
+  margin-top: 2rem;
+  width: 50%;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-basis: 10%;
+}
+.icon:hover {
+  cursor: pointer;
+}
+
+.search {
+  padding: 0.5rem 0;
+  font-size: 1.2rem;
+  border: none;
+  flex-basis: 90%;
+}
+
+.list {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0px 6px 12px 0px rgba(203, 203, 203, 0.274);
+}
+
+h3 {
+  margin: 0.5rem 0;
+}
+
+.select {
+  background: none;
+  border: 20px;
+}
